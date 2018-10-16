@@ -1,25 +1,42 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Component } from "react";
+import axios from "axios";
+import "./App.css";
 
 class App extends Component {
+  state = {
+    username: "",
+    password: "",
+    isLoggedIn: false
+  };
+  handleChange = ({ target: { name, value } }) =>
+    this.setState({ [name]: value });
+  handleClick = async () => {
+    let { username, password } = this.state;
+    let { status } = await axios.post("/api/login", { username, password });
+    console.log("status: ", status);
+    if (status === 200) this.setState({ isLoggedIn: true });
+  };
   render() {
+    let { username, password, isLoggedIn } = this.state;
     return (
       <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
+        <div className="form">
+          <input
+            onChange={this.handleChange}
+            name="username"
+            value={username}
+            placeholder="user name"
+          />
+          <input
+            onChange={this.handleChange}
+            name="password"
+            value={password}
+            type="password"
+            placeholder="password"
+          />
+          <button onClick={this.handleClick}>Submit</button>
+        </div>
+        {isLoggedIn ? <h1>You did it!</h1> : null}
       </div>
     );
   }
