@@ -3,19 +3,48 @@ import axios from "axios";
 import "./App.css";
 
 class App extends Component {
-  state = {
-    username: "",
-    password: "",
-    isLoggedIn: false
-  };
-  handleChange = ({ target: { name, value } }) =>
+  constructor(props) {
+    super(props);
+    this.state = {
+      username: "",
+      password: "",
+      isLoggedIn: false,
+      user: ""
+    };
+    this.handleChange = this.handleChange.bind(this);
+    this.handleClick = this.handleClick.bind(this);
+  }
+  componentDidMount() {
+    axios
+      .get("/api/isLoggedIn")
+      .then(({ data, status }) => {
+        if (status === 200)
+          this.setState({ isLoggedIn: true, user: data.username });
+      })
+      .catch(error => {
+        console.log("error: ", error);
+      });
+  }
+
+  handleChange({ target: { name, value } }) {
     this.setState({ [name]: value });
-  handleClick = async () => {
+  }
+
+  handleClick() {
     let { username, password } = this.state;
-    let { status } = await axios.post("/api/login", { username, password });
-    console.log("status: ", status);
-    if (status === 200) this.setState({ isLoggedIn: true });
-  };
+    axios
+      .post("/api/login", {
+        username,
+        password
+      })
+      .then(({ status, data }) => {
+        if (status === 200)
+          this.setState({ isLoggedIn: true, user: data.username });
+      })
+      .catch(error => {
+        console.log("error: ", error);
+      });
+  }
   render() {
     let { username, password, isLoggedIn } = this.state;
     return (
@@ -36,7 +65,11 @@ class App extends Component {
           />
           <button onClick={this.handleClick}>Submit</button>
         </div>
-        {isLoggedIn ? <h1>You did it!</h1> : null}
+        {isLoggedIn ? (
+          <h1>You did it, {this.state.user}!</h1>
+        ) : (
+          <h1>Error logging in</h1>
+        )}
       </div>
     );
   }
